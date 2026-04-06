@@ -1,0 +1,393 @@
+ <!DOCTYPE html>
+<html>
+
+<head>
+  <base target="_top">
+  <style>
+
+  </style>
+  <title>📅 Class Calendar Script</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.1/flowbite.min.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    tailwind.config = {
+        darkMode: 'class',
+      }
+  </script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .class-grid > div > input[type="text"] {
+        @apply rounded-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5;
+      }
+      .class-grid > div > input[type="checkbox"] {
+        @apply w-6 h-6 text-blue-600 bg-gray-50 checked:bg-blue-600 border-gray-300 rounded-md focus:ring-blue-500 focus:ring-2;
+      }
+      .class-grid > div > div {
+        @apply inline-flex w-12 justify-center items-center px-3 text-sm text-gray-500 bg-gray-200 border border-r-0 border-gray-300 rounded-l-md;
+      }
+
+    }
+  </style>
+</head>
+
+<body onload="loaded()">
+  <div class="hidden fixed sm:flex justify-end" style="display: none !important"></div>
+  <div class="md:px-24 md:py-12 p-6">
+    <h1 class="text-5xl font-extrabold mb-4">Class Calendar Script</h1>
+    <p class="mb-3 text-gray-500">This script plots all your regular day and 8 period day class rotations into a Google Calendar. This updated script is the work of <b>Anvay Mathur</b>. Buy him a coffee.</p>
+    <p class="mb-3 text-gray-500"><i>*Note - changes to the base calendar, daily rotation and irregular days may cause inaccurate plots.</i></p>
+    <br>
+
+    <label for="calendarName" class="block mb-2 text-sm font-medium text-gray-900">Calendar name</label>
+    <input type="text" id="calendarName" aria-describedby="calendar-name-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 max-w-xl" value="Daily Classes" placeholder="Daily Classes">
+    <p id="calendar-name-explanation" class="mt-2 text-sm text-gray-500 mb-4">Use any short descriptive name here.</p>
+
+    <div class="flex flex-row gap-x-4 flex-wrap">
+      <div class="max-w-full">
+        <label for="startDate" class="block mb-2 text-sm font-medium text-gray-900">Start date of calendar</label>
+        <div class="relative w-96 max-w-full">
+          <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
+            <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor" viewBox="0 0 20 20">
+              <path
+                d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+            </svg>
+          </div>
+          <input datepicker id="startDate" type="text" aria-describedby="start-date-explanation" readonly datepicker-buttons datepicker-format="dd/mm/yyyy" class="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block pl-10 p-2.5      " placeholder="Select date">
+        </div>
+        <p id="start-date-explanation" class="mt-2 text-sm text-gray-500 mb-4">Defaults to today's date.</p>
+
+      </div>
+      <div class="max-w-full">
+        <label for="endDate" class="block mb-2 text-sm font-medium text-gray-900">End date of calendar</label>
+        <div class="relative w-96 max-w-full">
+          <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
+            <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor" viewBox="0 0 20 20">
+              <path
+                d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+            </svg>
+          </div>
+          <input datepicker id="endDate" type="text" aria-describedby="end-date-explanation" readonly datepicker-buttons datepicker-format="dd/mm/yyyy" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5" placeholder="Select date">
+        </div>
+        <p id="end-date-explanation" class="mt-2 text-sm text-gray-500 mb-4">One semester maximum recommended. This date
+          is exclusive.</p>
+
+      </div>
+    </div>
+    <br>
+
+    <h2 class="text-4xl font-bold mb-4">Class information</h2>
+
+    <p class="mb-2 text-gray-500">Enter short class titles exactly as you want them to appear on a Google Calendar into
+      the boxes below that correspond with their period. Leave the box empty if you have no class scheduled that block. </p>
+
+    <p class="mb-2 text-gray-500">For the location box, enter the corresponding room number (e.g. H321).
+      You can also leave the location blank if you don't need it.</p>
+
+      <p class="mb-4 text-gray-500">For the "Set Event as Busy" checkbox, you can check the box to make the corresponding class event set as busy in your calendar.</p>
+    
+    <div class="flex items-center">
+      <input id="advisory-checkbox" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+      <label for="advisory-checkbox" class="ml-2 text-sm font-medium text-gray-900">Add Advisory event</label>
+    </div>
+
+    <ul class="items-center w-full mt-4 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hidden" id="advisory-prompt">
+      <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+          <div class="flex items-center pl-3">
+              <input id="horizontal-list-radio-license" type="radio" value="9/10" name="list-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2" checked>
+              <label for="horizontal-list-radio-license" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 ">Grade 9 or 10 Advisory</label>
+          </div>
+      </li>
+      <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r ">
+          <div class="flex items-center pl-3">
+              <input id="horizontal-list-radio-id" type="radio" value="11/12" name="list-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500    focus:ring-2">
+              <label for="horizontal-list-radio-id" class="w-full py-3 ml-2 text-sm font-medium text-gray-900">Grade 11 or 12 Advisory</label>
+          </div>
+      </li>
+    </ul>
+    <div class="mb-6 w-full"></div>
+    <div class="grid grid-cols-[3rem_16rem_16rem_12rem] text-right gap-4 content items-center mb-8 md:-mx-24 -mx-6 md:px-24 px-6 py-6 class-grid overflow-x-scroll bg-gray-100">
+      <p></p>
+      <h6 class="text-lg font-bold text-left">Class Name</h6>
+      <h6 class="text-lg font-bold text-left">Location</h6>
+      <h6 class="text-lg font-bold text-left">Set Event as Busy</h6>
+      <div class="hidden advisory-row">
+        <p>Adv</p>
+      </div>
+      <div class="hidden advisory-row"> <input type="text" value="Advisory" id="ADV"></div>
+      <div class="hidden advisory-row"> <input type="text" value="" id="ADVL"></div>
+      <div class="hidden advisory-row !justify-start"> <input type="checkbox" checked id="ADVB"></div>
+      <div>
+        <p>A1</p>
+      </div>
+      <div class="flex"> <input type="text" value="" id="A1"></div>
+      <div class="flex"> <input type="text" value="" id="A1L"></div>
+      <div class="flex"> <input type="checkbox" checked id="A1B"></div>
+      <div>
+        <p>A2</p>
+      </div>
+      <div class="flex"> <input type="text" value="" id="A2"></div>
+      <div class="flex"> <input type="text" value="" id="A2L"></div>
+      <div class="flex"> <input type="checkbox" checked id="A2B"></div>
+      <div>
+        <p>A3</p>
+      </div>
+      <div class="flex"> <input type="text" value="" id="A3"></div>
+      <div class="flex"> <input type="text" value="" id="A3L"></div>
+      <div class="flex"> <input type="checkbox" value="" checked id="A3B"></div>
+      <div>
+        <p>A4</p>
+      </div>
+      <div class="flex"> <input type="text" value="" id="A4"></div>
+      <div class="flex"> <input type="text" value="" id="A4L"></div>
+      <div class="flex"> <input type="checkbox" value="" checked id="A4B"></div>
+      <div>
+        <p>B1</p>
+      </div>
+      <div class="flex"> <input type="text" value="" id="B1"></div>
+      <div class="flex"> <input type="text" value="" id="B1L"></div>
+      <div class="flex"> <input type="checkbox" value="" checked id="B1B"></div>
+      <div>
+        <p>B2</p>
+      </div>
+      <div class="flex"> <input type="text" value="" id="B2"></div>
+      <div class="flex"> <input type="text" value="" id="B2L"></div>
+      <div class="flex"> <input type="checkbox" value="" checked id="B2B"></div>
+      <div>
+        <p>B3</p>
+      </div>
+      <div class="flex"> <input type="text" value="" id="B3"></div>
+      <div class="flex"> <input type="text" value="" id="B3L"></div>
+      <div class="flex"> <input type="checkbox" value="" checked id="B3B"></div>
+      <div>
+        <p>B4</p>
+      </div>
+      <div class="flex"> <input type="text" value="" id="B4"></div>
+      <div class="flex"> <input type="text" value="" id="B4L"></div>
+      <div class="flex"> <input type="checkbox" value="" checked id="B4B"></div>
+    </div>
+
+    <button type="button" onclick="runMain()" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-blue-800">Generate calendar</button>
+  </div>
+  <div class="hidden top-0 bg-black/[0.7] w-screen h-screen flex justify-center items-center" id="loadingScreen">
+    <div class="w-3/4">
+      <div class="flex justify-between mb-1">
+        <span class="text-lg font-medium text-white">Creating calendar...</span>
+        <span class="text-md font-medium text-white" id="percentage">0%</span>
+      </div>
+      <div class="w-full rounded-full h-4 bg-gray-700">
+        <div class="bg-blue-600 h-4 rounded-full transition-[width]" id="loading" style="width: 0%;"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.1/flowbite.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.1/datepicker.min.js"></script>
+
+  <script>
+    const advisoryCheck = document.querySelector("#advisory-checkbox");
+    const yearPrompt = document.querySelector("#advisory-prompt");
+    const advisoryRow = document.querySelectorAll(".advisory-row");
+
+    let includeAdvisory = advisoryCheck.checked;
+    let curAdvYear = document.querySelector("input[name=list-radio]:checked")?.value;
+
+    const advClassMapping = {
+      true: {
+        add: "sm:flex",
+        remove: "hidden"
+      },
+      false: {
+        add: "hidden",
+        remove: "sm:flex"
+      }
+    };
+    const advRowMapping = {
+      true: {
+        add: ["flex", "justify-end"],
+        remove: ["hidden"]
+      },
+      false: {
+        add: ["hidden"],
+        remove: ["flex", "justify-end"]
+      }
+    };
+
+    advisoryCheck.addEventListener("change", (e) => {
+      includeAdvisory = e.target.checked;
+      yearPrompt.classList.add(advClassMapping[includeAdvisory].add);
+      yearPrompt.classList.remove(advClassMapping[includeAdvisory].remove);
+
+      advisoryRow.forEach((cell) => {
+        cell.classList.add(...advRowMapping[includeAdvisory].add);
+        cell.classList.remove(...advRowMapping[includeAdvisory].remove);
+      });
+    });
+    
+    // Sometimes JS is really stupid and radio buttons happen to be one of those moments
+    document.querySelectorAll("input[name=list-radio]").forEach((input) => {
+      input.addEventListener("change", (e) => {
+        curAdvYear = document.querySelector("input[name=list-radio]:checked")?.value;
+      })
+    })
+
+
+    function getFormattedDate(date) {
+          let year = date.getFullYear();
+          let month = (1 + date.getMonth()).toString().padStart(2, '0');
+          let day = date.getDate().toString().padStart(2, '0');
+        
+          return month + '/' + day + '/' + year;
+      }
+      /**
+       * Swaps DD and MM in a date
+       * @param {string} date - Unswapped DD and MM
+       * @param {string} seperator - Character between each date number
+       * @returns {string} Swapped DD and MM
+       */
+      function swapDate(date, seperator="/") {
+        const split = date.split(seperator);
+        return `${split[1]}${seperator}${split[0]}${seperator}${split[2]}`;
+      }
+      function loaded() {
+        document.title = "Daily Calendar Script";
+        
+        Date.prototype.toDateInputValue = (function() {
+          var local = new Date(this);
+          local.setMinutes(this.getMinutes() - this.getTimezoneOffset());
+          return local.toJSON().slice(0,10);
+        });
+        startDate.value = swapDate(getFormattedDate(new Date()));
+        startDate.placeholder = swapDate(getFormattedDate(new Date()));
+        endDate.value = '07/06/2026';
+        endDate.placeholder = '07/06/2026'; // DD/MM/YY
+        // endDate.value = '29/08/2023';
+      }
+
+      function runMain() {
+        if (includeAdvisory && !curAdvYear) {
+          alert("Please select which grade you or your advisory is to use the advisory event feature before generating.");
+          return;
+        }
+        alert("Please do not close this page until another alert box like this one pops up!\n\nA loading screen will appear shortly.");
+
+        const adv = document.getElementById("ADV").value || undefined;
+        const a1 = document.getElementById("A1").value || undefined;
+        const a2 = document.getElementById("A2").value || undefined;
+        const a3 = document.getElementById("A3").value || undefined;
+        const a4 = document.getElementById("A4").value || undefined;
+        const b1 = document.getElementById("B1").value || undefined;
+        const b2 = document.getElementById("B2").value || undefined;
+        const b3 = document.getElementById("B3").value || undefined;
+        const b4 = document.getElementById("B4").value || undefined;
+
+        const advl = document.getElementById("ADVL").value || undefined;
+        const a1l = document.getElementById("A1L").value || undefined;
+        const a2l = document.getElementById("A2L").value || undefined;
+        const a3l = document.getElementById("A3L").value || undefined;
+        const a4l = document.getElementById("A4L").value || undefined;
+        const b1l = document.getElementById("B1L").value || undefined;
+        const b2l = document.getElementById("B2L").value || undefined;
+        const b3l = document.getElementById("B3L").value || undefined;
+        const b4l = document.getElementById("B4L").value || undefined;
+
+        const advb = document.getElementById("ADVB").checked || false;
+        const a1b = document.getElementById("A1B").checked || false;
+        const a2b = document.getElementById("A2B").checked || false;
+        const a3b = document.getElementById("A3B").checked || false;
+        const a4b = document.getElementById("A4B").checked || false;
+        const b1b = document.getElementById("B1B").checked || false;
+        const b2b = document.getElementById("B2B").checked || false;
+        const b3b = document.getElementById("B3B").checked || false;
+        const b4b = document.getElementById("B4B").checked || false;
+
+
+
+        let classes = {
+          "A Day (high school)": [
+            { class: a1, location: a1l, busy: a1b },
+            { class: a2, location: a2l, busy: a2b },
+            { class: a3, location: a3l, busy: a3b },
+            { class: a4, location: a4l, busy: a4b }
+          ],
+          "B Day (high school)": [
+            { class: b1, location: b1l, busy: b1b },
+            { class: b2, location: b2l, busy: b2b },
+            { class: b3, location: b3l, busy: b3b },
+            { class: b4, location: b4l, busy: b4b }
+          ],
+          "C Day (high school)": [
+            { class: a3, location: a3l, busy: a3b },
+            { class: a4, location: a4l, busy: a4b },
+            { class: a1, location: a1l, busy: a1b },
+            { class: a2, location: a2l, busy: a2b }
+          ],
+          "D Day (high school)": [
+            { class: b3, location: b3l, busy: b3b },
+            { class: b4, location: b4l, busy: b4b },
+            { class: b1, location: b1l, busy: b1b },
+            { class: b2, location: b2l, busy: b2b }
+          ],
+          "8 Block Day (high school)": [
+            { class: a1, location: a1l, busy: a1b },
+            { class: a2, location: a2l, busy: a2b },
+            { class: a3, location: a3l, busy: a3b },
+            { class: a4, location: a4l, busy: a4b },
+            { class: b1, location: b1l, busy: b1b },
+            { class: b2, location: b2l, busy: b2b },
+            { class: b3, location: b3l, busy: b3b },
+            { class: b4, location: b4l, busy: b4b }
+          ],
+        };
+
+        if (includeAdvisory) {
+          classes.advisory = { class: adv, location: advl, busy: advb, year: curAdvYear };
+        } 
+
+        console.log(classes);
+
+        let done = false;
+        let progressBarVisible = false;
+
+        let dataFetcher = setInterval(() => {
+          google.script.run.withSuccessHandler((res) => {
+            if (!progressBarVisible && !done) {
+              percentage.innerText = "0%";
+              loading.style.width = "0%";
+              loadingScreen.classList.remove("hidden");
+              loadingScreen.classList.add("fixed");
+              progressBarVisible = true;
+            }
+            if (progressBarVisible && res.totalCount != -1 && !isNaN(Math.round((res.count / res.totalCount) * 100))) {
+              percentage.innerText = Math.round((res.count / res.totalCount) * 100) + "%";
+              loading.style.width = (res.count / res.totalCount) * 100 + "%";
+            }
+          }).fetchProgress();
+        }, 200);
+
+        google.script.run.withSuccessHandler(_ => {
+          console.log('done');
+          done = true;
+          loadingScreen.classList.remove("fixed");
+          loadingScreen.classList.add("hidden");
+          progressBarVisible = false;
+          clearInterval(dataFetcher);
+          alert('Done! Confirm that your newly created calendar is checked on the "My calendars" list to the left side of Google Calendar. Now you can close this tab. Enjoy your new calendar :)');
+        }).withFailureHandler(err => {
+          done = true;
+          loadingScreen.classList.remove("fixed");
+          loadingScreen.classList.add("hidden");
+          progressBarVisible = false;
+          console.error(err);
+          clearInterval(dataFetcher);
+          alert("There was an error while creating your calendar. Please try again. \n\nLogs in console")
+        }).createCalendar(calendarName.value, classes, swapDate(startDate.value == "" ? startDate.placeholder : startDate.value), swapDate(endDate.value == "" ? endDate.placeholder : endDate.value));
+      }
+  </script>
+</body>
+
+</html>
